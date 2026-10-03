@@ -1,0 +1,11 @@
+{
+  "name": "中土远征 · 新西兰旅行面板",
+  "short_name": "中土远征",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0a1611",
+  "theme_color": "#0a1611",
+  "icons": [
+    { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}
