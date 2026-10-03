@@ -63,7 +63,7 @@ export default function FlightsSection({ flights }: { flights: FlightsData | nul
         <Plane className="mr-2 inline" size={22} /> 巨鹰驿站 · 机票行情
       </h2>
       <p className="mt-5 text-sm" style={{ color: "#9db0a0" }}>
-        票价为航司官方发布价（Google Flights，单人经济舱），报价同时涵盖直飞与中转组合；云端每天自动记录 2 条航线、周日加查远途航线，轮换覆盖全部组合
+        票价为航司官方发布价（Google Flights，单人经济舱），报价同时涵盖直飞与中转组合；云端每天自动记录 6 组航线、周日加查远途航线，近途全部组合每 2 天覆盖一轮
         {flights?.updated && <span className="ml-2">· 更新于 {flights.updated.slice(0, 16).replace("T", " ")}</span>}
       </p>
 
