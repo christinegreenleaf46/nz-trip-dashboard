@@ -10,7 +10,8 @@
   2. 机票：SerpApi 的 Google Flights 接口（票价为航司官方发布价）
      - 去程：上海浦东 PVG / 南京禄口 NKG（日常轮换）+ 北京 PEK / 成都 CTU（每周日加查）→ 奥克兰 AKL
      - 返程：皇后镇 ZQN → 上述四地
-     - 免费额度 100 次/月，脚本按轮换计划每天只用 2 次（周日 6 次），月度约 78 次
+     - 免费额度 250 次/月，脚本按「去程/返程交错」轮换计划每天查 6 次（周日远途加查 6 次），
+       12 个近途组合每 2 天全覆盖，月度约 204 次，留有安全余量
 
 输出：public/data/rates.json、public/data/flights.json
 """
@@ -34,7 +35,7 @@ NEAR_AIRPORTS = ["PVG", "NKG"]              # 离安徽近：上海浦东、南�
 FAR_AIRPORTS = ["PEK", "CTU"]               # 较远：北京首都、成都天府（每周日加查）
 OUTBOUND_DATES = ["2027-01-26", "2027-01-27", "2027-01-28", "2027-01-29"]
 INBOUND_DATES = ["2027-02-11", "2027-02-12"]
-DAILY_CALLS = 2                             # 平日每天机票查询次数
+DAILY_CALLS = 6                             # 平日每天机票查询次数（12 个近途组合每 2 天全覆盖）
 SUNDAY_CALLS = 6                            # 周日远途航线加查次数
 HISTORY_CAP = 240                           # 每个航线+日期最多保留的历史快照数
 
@@ -93,8 +94,14 @@ def build_plan(flights: dict) -> list:
             plan.append((INBOUND_ORIGIN, o, INBOUND_DATES[0]))
         return plan[:SUNDAY_CALLS]
 
-    near = [(o, OUTBOUND_DEST, d) for o in NEAR_AIRPORTS for d in OUTBOUND_DATES]
-    near += [(INBOUND_ORIGIN, o, d) for o in NEAR_AIRPORTS for d in INBOUND_DATES]
+    # 去程/返程交错排列：每个出发日后面紧跟同序返程日，返程第 2 天即有数据
+    near = []
+    for i, od in enumerate(OUTBOUND_DATES):
+        for o in NEAR_AIRPORTS:
+            near.append((o, OUTBOUND_DEST, od))
+        if i < len(INBOUND_DATES):
+            for o in NEAR_AIRPORTS:
+                near.append((INBOUND_ORIGIN, o, INBOUND_DATES[i]))
     idx = flights.get("state", {}).get("idx", 0) % len(near)
     plan = [near[(idx + i) % len(near)] for i in range(DAILY_CALLS)]
     flights.setdefault("state", {})["idx"] = (idx + DAILY_CALLS) % len(near)
